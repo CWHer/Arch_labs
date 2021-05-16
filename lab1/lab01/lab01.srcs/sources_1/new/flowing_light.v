@@ -21,25 +21,32 @@
 
 
 module flowing_light(
-           input clock,
+           input clock_p,
+           input clock_n,
            input reset,
            output [7: 0] led
        );
 
-reg [1: 0] cnt_reg;
+reg [23: 0] cnt_reg;
 reg [7: 0] light_reg;
 
-always @ (posedge clock) begin
-    if (reset)
+IBUFGDS IBUFGDS_inst(
+            .O(CLK_i),
+            .I(clock_p),
+            .IB(clock_n)
+        );
+
+always @ (posedge CLK_i) begin
+    if (!reset)
         cnt_reg <= 0;
     else
         cnt_reg <= cnt_reg + 1;
 end
 
-always @ (posedge clock) begin
-    if (reset)
+always @ (posedge CLK_i) begin
+    if (!reset)
         light_reg <= 8'h01;
-    else if (cnt_reg == 2'b11) begin    // 20 + 160 ns
+    else if (cnt_reg == 24'hffffff) begin
         if (light_reg == 8'h80)
             light_reg <= 8'h01;
         else

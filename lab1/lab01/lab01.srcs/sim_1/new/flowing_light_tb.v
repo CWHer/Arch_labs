@@ -32,15 +32,15 @@ flowing_light u0(
                   .reset(reset),
                   .led(led));
 
-parameter PERIOD = 10;
+parameter PERIOD = 20;
 
 always #(PERIOD * 2) clock = !clock;
 
 initial begin
     clock = 1'b0;
     reset = 1'b0;
-    #(PERIOD * 2) reset = 1'b1;     //  20ns
-    #(PERIOD * 2) reset = 1'b0;     //  40ns
+    #(PERIOD * 10) reset = 1'b1;     //  20ns
+    #(PERIOD * 5) reset = 1'b0;     //  40ns
 
     // #580; reset = 1'b1
 end
