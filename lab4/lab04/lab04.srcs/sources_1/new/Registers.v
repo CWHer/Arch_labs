@@ -34,7 +34,9 @@ module Registers(
 reg [31: 0] reg_file[31: 0];
 
 // read
-always @(read_reg1 or read_reg2) begin
+// also update at negedge of reg_write
+always @(read_reg1 or read_reg2
+             or reg_write) begin
 
     read_data1 = reg_file[read_reg1];
     read_data2 = reg_file[read_reg2];

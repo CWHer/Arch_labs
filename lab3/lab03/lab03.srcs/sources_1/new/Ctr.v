@@ -58,9 +58,9 @@ always @(op_code) begin
             jump = 0;
         end
         6'b101011: begin    // sw
-            reg_dst = 1'bx;
+            reg_dst = 1'b0;
             alu_src = 1;
-            mem2reg = 1'bx;
+            mem2reg = 1'b0;
             reg_write = 0;
             mem_read = 0;
             mem_write = 1;
@@ -69,9 +69,9 @@ always @(op_code) begin
             jump = 0;
         end
         6'b000100: begin    // beq
-            reg_dst = 1'bx;
+            reg_dst = 1'b0;
             alu_src = 0;
-            mem2reg = 1'bx;
+            mem2reg = 1'b0;
             reg_write = 0;
             mem_read = 0;
             mem_write = 0;

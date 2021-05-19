@@ -32,7 +32,9 @@ module DataMemory(
 reg [31: 0] mem_file[63: 0];
 
 // read
-always @(addr or mem_read) begin
+// also update at negedge of mem_write
+always @(addr or mem_read
+             or mem_write) begin
     if (mem_read)
         read_data = mem_file[addr];
 end
