@@ -33,9 +33,9 @@ Top top(.clk(clock),
         .reset(reset));
 
 initial begin
-    $readmemh("C:/Users/cwher/Desktop/Arch_labs/lab5/lab05/data.txt",
+    $readmemh("C:/Users/cwher/Desktop/data.txt",
               top.data_mem.mem_file);
-    $readmemb("C:/Users/cwher/Desktop/Arch_labs/lab5/lab05/inst.txt",
+    $readmemh("C:/Users/cwher/Desktop/inst.txt",
               top.inst_mem.inst_file);
     reset = 1;
 

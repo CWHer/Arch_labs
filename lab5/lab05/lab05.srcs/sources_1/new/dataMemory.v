@@ -29,10 +29,11 @@ module DataMemory(
            output reg [31: 0] read_data
        );
 
-reg [31: 0] mem_file[63: 0];
+reg [31: 0] mem_file[127: 0];
 
 // read
-always @(addr or mem_read) begin
+always @(addr or mem_read
+             or mem_write) begin
     if (mem_read)
         read_data = mem_file[addr];
 end
@@ -42,12 +43,5 @@ always @(negedge clk) begin
     if (mem_write)
         mem_file[addr] = write_data;
 end
-
-// initial begin: dataInit
-//     integer i;
-//     for (i = 0 ; i < 64 ; i = i + 1)
-//         mem_file[i] = 0;
-//     read_data = 0;
-// end
 
 endmodule

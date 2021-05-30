@@ -35,7 +35,8 @@ module Registers(
 reg [31: 0] reg_file[31: 0];
 
 // read
-always @(read_reg1 or read_reg2) begin
+always @(read_reg1 or read_reg2
+             or reg_write) begin
 
     read_data1 = reg_file[read_reg1];
     read_data2 = reg_file[read_reg2];
@@ -44,6 +45,7 @@ end
 
 // write
 always @(negedge clk) begin
+    // $stop;
     if (reg_write)
         reg_file[write_reg] = write_data;
 end
@@ -55,13 +57,5 @@ always @(posedge reset) begin: regReset
     read_data1 = 0;
     read_data2 = 0;
 end
-
-// initial begin: regInit
-//     integer i;
-//     for (i = 0 ; i < 32 ; i = i + 1)
-//         reg_file[i] = 0;
-//     read_data1 = 0;
-//     read_data2 = 0;
-// end
 
 endmodule

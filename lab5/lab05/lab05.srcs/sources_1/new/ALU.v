@@ -28,6 +28,7 @@ module ALU(input [31: 0] input1,
           );
 
 always @({input1, input2, alu_ctr}) begin
+    // $stop;
     case (alu_ctr)
         4'b0000:
             alu_res = input1 & input2;  // and
@@ -37,13 +38,17 @@ always @({input1, input2, alu_ctr}) begin
             alu_res = input1 + input2;  // add
         4'b0110:
             alu_res = input1 - input2;  // sub
+        4'b0011:
+            alu_res = input2 << input1; // <<
+        4'b0100:
+            alu_res = input2 >> input1; // >>
         4'b0111:
             // set on less than
             alu_res = ($signed(input1) < $signed(input2));
-        4'b1100:
-            alu_res = ~(input1 | input2);   // nor
-        default:
+        default: begin
+            // $stop;
             alu_res = 0;
+        end
     endcase
     zero = (alu_res == 0);
 end

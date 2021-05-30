@@ -25,17 +25,10 @@ module InstMemory(
            output reg [31: 0] inst
        );
 
-reg [31: 0] inst_file[31: 0];
+reg [31: 0] inst_file[63: 0];
 
 always @(addr) begin
-    inst = inst_file[addr];
+    inst = inst_file[addr >> 2];
 end
-
-// initial begin: instInit
-//     integer i;
-//     for (i = 0 ; i < 32 ; i = i + 1)
-//         inst_file[i] = 0;
-//     inst = 0;
-// end
 
 endmodule
