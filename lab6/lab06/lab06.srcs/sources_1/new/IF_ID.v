@@ -23,6 +23,7 @@
 module IF_ID(
            input reset,
            input clk,
+           input [2: 0] stall,
            input [31: 0] INST,
            input [31: 0] PC4,
            output reg [31: 0] INST_OUT,
@@ -31,14 +32,18 @@ module IF_ID(
 
 
 always @(posedge clk) begin
-    $stop;
-    if (reset) begin
-        PC4_OUT = 0;
-        INST_OUT = 0;
-    end
-    else begin
-        PC4_OUT = PC4;
-        INST_OUT = INST;
+    // $stop;
+
+    // do not change ID when stalled
+    if (!stall) begin
+        if (reset) begin
+            PC4_OUT = 0;
+            INST_OUT = 0;
+        end
+        else begin
+            PC4_OUT = PC4;
+            INST_OUT = INST;
+        end
     end
 end
 

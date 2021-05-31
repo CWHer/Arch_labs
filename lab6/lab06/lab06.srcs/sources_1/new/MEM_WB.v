@@ -40,7 +40,8 @@ module MEM_WB(
        );
 
 always @(posedge clk) begin
-    $stop;
+    // $stop;
+
     if (reset) begin
         PC4_OUT = 0;
         MEM_READ_DATA_OUT = 0;

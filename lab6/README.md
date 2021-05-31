@@ -14,9 +14,9 @@
 
   支持`flush`，分支预测总是不跳转，解决了`control hazard`
 
-- [ ] Ver0.8
+- [x] Ver0.8
 
-  支持stall
+  支持stall，通过了`main.s`的测试
 
 - [ ] Ver1.0
 

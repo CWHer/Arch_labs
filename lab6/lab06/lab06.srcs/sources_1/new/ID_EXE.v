@@ -62,7 +62,8 @@ module ID_EXE(
        );
 
 always @(posedge clk) begin
-    $stop;
+    // $stop;
+
     if (reset) begin
         PC4_OUT = 0;
         ALU_CTR_OUT = 0;

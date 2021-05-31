@@ -39,7 +39,7 @@ initial begin
               top.inst_mem.inst_file);
     reset = 1;
     clock = 0;
-    #45;
+    #25;
     reset = 0;
 end
 

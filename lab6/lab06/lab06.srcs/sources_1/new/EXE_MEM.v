@@ -58,7 +58,8 @@ module EXE_MEM(
        );
 
 always @(posedge clk) begin
-    $stop;
+    // $stop;
+    
     if (reset) begin
         RES_OUT_MUX_OUT = 0;
         REG_WRITE_OUT = 0;

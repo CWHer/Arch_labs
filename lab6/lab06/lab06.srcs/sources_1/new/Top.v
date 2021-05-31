@@ -30,6 +30,9 @@ module Top(
 // ---------> IF begin
 // solve control hazard
 reg FLUSH;
+reg [2: 0] STALL = 0;
+// stall out from ID
+wire [2: 0] STALL_OUT;
 
 wire IF_BRANCH_MUX, IF_ZERO;
 wire IF_REG_PC_MUX, IF_JUMP_MUX;
@@ -43,11 +46,15 @@ assign IF_PC4 = PC + 4;
 always @((IF_BRANCH_MUX & IF_ZERO)
              or IF_JUMP_MUX
              or IF_REG_PC_MUX) begin
-    // jump
-    $stop;
-    FLUSH = (IF_BRANCH_MUX & IF_ZERO)
-          | IF_JUMP_MUX
-          | IF_REG_PC_MUX;
+    // may jump
+
+    if ((IF_BRANCH_MUX & IF_ZERO)
+            | IF_JUMP_MUX
+            | IF_REG_PC_MUX) begin
+        $stop;
+        FLUSH <= 1;
+        STALL <= 0;
+    end
 end
 
 // branch mux
@@ -75,16 +82,25 @@ InstMemory inst_mem(.addr(PC), .inst(IF_INST));
 always @(posedge clk) begin
     // debug
     // $stop;
-    FLUSH = 0;
+    FLUSH <= 0;
+    if (STALL_OUT != 1'bx)
+        STALL <= STALL_OUT;
+
     if (reset)
         PC <= 0;
-    else
-        PC <= NEXT_PC;
+    else begin
+        if (STALL == 0)
+            PC <= NEXT_PC;
+        else
+            STALL <= STALL - 1;
+    end
+
 end
 // <--------- IF end
 wire [31: 0] ID_PC4, ID_INST;
 IF_ID if_id(
           .reset(reset | FLUSH),
+          .stall(STALL),
           .clk(clk),
           .INST(IF_INST),
           .PC4(IF_PC4),
@@ -107,6 +123,7 @@ wire ID_REG_DST_MUX, ID_REG_RA_MUX, EXT_TYPE;
 // instruction decode
 Ctr controller(
         .inst(ID_INST),
+        .stall(STALL),
         .reg_dst_mux(ID_REG_DST_MUX),
         .reg_ra_mux(ID_REG_RA_MUX),
         .alu_src_mux(ID_ALU_SRC_MUX),
@@ -120,7 +137,8 @@ Ctr controller(
         .pc_reg_mux(ID_PC_REG_MUX),
         .reg_pc_mux(ID_REG_PC_MUX),
         .ext_type(EXT_TYPE),
-        .alu_ctr(ID_ALU_CTR));
+        .alu_ctr(ID_ALU_CTR),
+        .stall_out(STALL_OUT));
 
 wire [4: 0] INST_OUT;
 // register dst
@@ -182,7 +200,8 @@ wire [31: 0] EXE_READ_REG_1;
 wire [31: 0] EXE_READ_REG_2;
 
 ID_EXE id_exe(
-           .reset(reset | FLUSH),
+           .reset(reset | FLUSH
+                  | (STALL != 0)),
            .clk(clk),
            .PC4(ID_PC4),
            .ALU_CTR(ID_ALU_CTR),
