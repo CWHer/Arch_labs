@@ -131,13 +131,12 @@ always @(inst or stall) begin
                     reg_write = 1;
                     mem_read = 1;
                     alu_ctr = 4'b0010; // add
-                    stall_out = 2;
+                    stall_out = 1;
                 end
                 6'b101011: begin    // sw
                     alu_src_mux = 1;
                     mem_write = 1;
                     alu_ctr = 4'b0010; // add
-                    stall_out = 2;
                 end
                 6'b000100: begin    // beq
                     branch_mux = 1;
@@ -175,6 +174,9 @@ always @(inst or stall) begin
         end
         else
             $stop;
+    end
+    else begin
+        stall_out = stall - 1; // dec stall 
     end
 end
 

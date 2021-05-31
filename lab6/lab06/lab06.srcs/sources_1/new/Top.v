@@ -31,8 +31,8 @@ module Top(
 // solve control hazard
 reg FLUSH;
 // solve data hazard
-reg [2: 0] STALL = 0;
-wire [2: 0] STALL_OUT; // stall out from ID
+reg [2: 0] STALL = 0; // dec in Ctr
+wire [2: 0] STALL_OUT; // stall out from Ctr
 
 wire IF_BRANCH_MUX, IF_ZERO;
 wire IF_REG_PC_MUX, IF_JUMP_MUX;
@@ -83,16 +83,13 @@ always @(posedge clk) begin
     // debug
     // $stop;
     FLUSH <= 0;
-    if (STALL_OUT != 1'bx)
-        STALL <= STALL_OUT;
+    STALL <= STALL_OUT;
 
     if (reset)
         PC <= 0;
     else begin
         if (STALL == 0)
             PC <= NEXT_PC;
-        else
-            STALL <= STALL - 1;
     end
 
 end
@@ -178,18 +175,35 @@ Registers regs(
 // from EXE
 wire [4: 0] FOR_EXE_WRITE_REG_ADDR;
 wire [31: 0] FOR_EXE_REG_WRITE_DATA;
+// from MEM
+wire [4: 0] FOR_MEM_WRITE_REG_ADDR;
+wire [31: 0] FOR_MEM_REG_WRITE_DATA;
 
-Mux32 for_data_1(.ctr(FOR_EXE_WRITE_REG_ADDR
-                      == ID_INST[25: 21]),
-                 .input1(FOR_EXE_REG_WRITE_DATA),
-                 .input0(READ_REG_1),
-                 .data_out(ID_READ_REG_1));
+wire [31: 0] FOR_REG_1, FOR_REG_2;
 
-Mux32 for_data_2(.ctr(FOR_EXE_WRITE_REG_ADDR
-                      == ID_INST[20: 16]),
-                 .input1(FOR_EXE_REG_WRITE_DATA),
-                 .input0(READ_REG_2),
-                 .data_out(ID_READ_REG_2));
+Mux32 for_exe_data_1(.ctr(FOR_EXE_WRITE_REG_ADDR
+                          == ID_INST[25: 21]),
+                     .input1(FOR_EXE_REG_WRITE_DATA),
+                     .input0(READ_REG_1),
+                     .data_out(FOR_REG_1));
+
+Mux32 for_exe_data_2(.ctr(FOR_EXE_WRITE_REG_ADDR
+                          == ID_INST[20: 16]),
+                     .input1(FOR_EXE_REG_WRITE_DATA),
+                     .input0(READ_REG_2),
+                     .data_out(FOR_REG_2));
+
+Mux32 for_mem_data_1(.ctr(FOR_MEM_WRITE_REG_ADDR
+                          == ID_INST[25: 21]),
+                     .input1(FOR_MEM_REG_WRITE_DATA),
+                     .input0(FOR_REG_1),
+                     .data_out(ID_READ_REG_1));
+
+Mux32 for_mem_data_2(.ctr(FOR_MEM_WRITE_REG_ADDR
+                          == ID_INST[20: 16]),
+                     .input1(FOR_MEM_REG_WRITE_DATA),
+                     .input0(FOR_REG_2),
+                     .data_out(ID_READ_REG_2));
 // <--- forwarding end
 
 // imm extend
@@ -291,16 +305,16 @@ assign EXE_BRANCH_ADDR = EXE_PC4 + (EXE_IMM_OUT << 2);
 // forwarding addr and data
 // to next EXE
 // $zero is always 0
-Mux5 for_reg_addr(.ctr(!EXE_RES_OUT_MUX
-                       & EXE_REG_WRITE),
-                  .input1(EXE_WRITE_REG_ADDR),
-                  .input0(5'b0),
-                  .data_out(FOR_EXE_WRITE_REG_ADDR));
-Mux32 for_reg_data(.ctr(!EXE_RES_OUT_MUX
-                        & EXE_REG_WRITE),
-                   .input1(EXE_ALU_RESULT),
-                   .input0(32'b0),
-                   .data_out(FOR_EXE_REG_WRITE_DATA));
+Mux5 for_exe_reg_addr(.ctr(!EXE_RES_OUT_MUX
+                           & EXE_REG_WRITE),
+                      .input1(EXE_WRITE_REG_ADDR),
+                      .input0(5'b0),
+                      .data_out(FOR_EXE_WRITE_REG_ADDR));
+Mux32 for_exe_reg_data(.ctr(!EXE_RES_OUT_MUX
+                            & EXE_REG_WRITE),
+                       .input1(EXE_ALU_RESULT),
+                       .input0(32'b0),
+                       .data_out(FOR_EXE_REG_WRITE_DATA));
 // ---------> EXE end
 
 wire MEM_RES_OUT_MUX, MEM_REG_WRITE;
@@ -358,6 +372,20 @@ DataMemory data_mem(
                .mem_write(MEM_MEM_WRITE),
                .mem_read(MEM_MEM_READ),
                .read_data(MEM_MEM_READ_DATA));
+
+// forwarding addr and data
+// to next EXE
+// $zero is always 0
+Mux5 for_mem_reg_addr(.ctr(MEM_RES_OUT_MUX
+                           & MEM_REG_WRITE),
+                      .input1(MEM_WRITE_REG_ADDR),
+                      .input0(5'b0),
+                      .data_out(FOR_MEM_WRITE_REG_ADDR));
+Mux32 for_mem_reg_data(.ctr(MEM_RES_OUT_MUX
+                            & MEM_REG_WRITE),
+                       .input1(MEM_MEM_READ_DATA),
+                       .input0(32'b0),
+                       .data_out(FOR_MEM_REG_WRITE_DATA));
 // <--------- MEM end
 wire [31: 0] WB_PC4;
 wire [31: 0] WB_MEM_READ_DATA;
