@@ -33,10 +33,13 @@ module Registers(
        );
 // 32 registers
 reg [31: 0] reg_file[31: 0];
+// solve structural hazard
+// write first then read
+reg write_finish;
 
 // read
 always @(read_reg1 or read_reg2
-             or reg_write) begin
+             or reg_write or write_finish) begin
 
     read_data1 = reg_file[read_reg1];
     read_data2 = reg_file[read_reg2];
@@ -45,9 +48,12 @@ end
 
 // write
 always @(negedge clk) begin
-    // $stop;
-    if (reg_write)
+    if (reg_write) begin
+        // $stop;
         reg_file[write_reg] = write_data;
+        write_finish = !write_finish;
+    end
+
 end
 
 always @(posedge reset) begin: regReset
@@ -56,6 +62,7 @@ always @(posedge reset) begin: regReset
         reg_file[i] = 0;
     read_data1 = 0;
     read_data2 = 0;
+    write_finish = 0;
 end
 
 endmodule

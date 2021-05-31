@@ -4,24 +4,28 @@
 
   basic五级流水
 
-  需要nop填充，没有flush，没有stall
+  需要`nop`填充，没有`flush`，没有`stall`
 
-  不支持冒险，不支持分支（beq，jal，j，jr）
+  不支持冒险，不支持分支（`beq`，`jal`，`j`，`jr`）
 
-- [ ] Ver0.6
+- [x] Ver0.6
 
-  支持stall
+  引入了`write_finish`，在写入寄存器后修改，解决了`structural hazard`
+
+  支持`flush`，分支预测总是不跳转，解决了`control hazard`
 
 - [ ] Ver0.8
 
-  支持forwarding
+  支持stall
 
 - [ ] Ver1.0
 
-  支持flush，分支预测总是不跳转
+  支持forwarding
 
   
 
   
 
+  
+  
   

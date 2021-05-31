@@ -28,13 +28,28 @@ module Top(
        );
 
 // ---------> IF begin
-wire IF_BRANCH_MUX, IF_ZERO, IF_JUMP_MUX;
+// solve control hazard
+reg FLUSH;
+
+wire IF_BRANCH_MUX, IF_ZERO;
+wire IF_REG_PC_MUX, IF_JUMP_MUX;
 wire [31: 0] IF_JUMP_ADDR, IF_BRANCH_ADDR, IF_READ_REG_1;
 
 reg [31: 0] PC;
 wire [31: 0] IF_PC4, NEXT_PC, IF_INST;
 wire [31: 0] BRANCH_OUT, JUMP_OUT;
 assign IF_PC4 = PC + 4;
+
+always @((IF_BRANCH_MUX & IF_ZERO)
+             or IF_JUMP_MUX
+             or IF_REG_PC_MUX) begin
+    // jump
+    $stop;
+    FLUSH = (IF_BRANCH_MUX & IF_ZERO)
+          | IF_JUMP_MUX
+          | IF_REG_PC_MUX;
+end
+
 // branch mux
 Mux32 branch_mux(
           .ctr(IF_BRANCH_MUX & IF_ZERO),
@@ -60,7 +75,7 @@ InstMemory inst_mem(.addr(PC), .inst(IF_INST));
 always @(posedge clk) begin
     // debug
     // $stop;
-
+    FLUSH = 0;
     if (reset)
         PC <= 0;
     else
@@ -69,7 +84,7 @@ end
 // <--------- IF end
 wire [31: 0] ID_PC4, ID_INST;
 IF_ID if_id(
-          .reset(reset),
+          .reset(reset | FLUSH),
           .clk(clk),
           .INST(IF_INST),
           .PC4(IF_PC4),
@@ -167,7 +182,7 @@ wire [31: 0] EXE_READ_REG_1;
 wire [31: 0] EXE_READ_REG_2;
 
 ID_EXE id_exe(
-           .reset(reset),
+           .reset(reset | FLUSH),
            .clk(clk),
            .PC4(ID_PC4),
            .ALU_CTR(ID_ALU_CTR),
@@ -241,9 +256,9 @@ wire [4: 0] MEM_WRITE_REG_ADDR;
 wire [31: 0] MEM_READ_REG_2, MEM_ALU_RESULT;
 wire [31: 0] MEM_PC4;
 
-
+// also link to IF
 EXE_MEM exe_mem(
-            .reset(reset),
+            .reset(reset | FLUSH),
             .clk(clk),
             .RES_OUT_MUX(EXE_RES_OUT_MUX),
             .REG_WRITE(EXE_REG_WRITE),
