@@ -76,35 +76,30 @@ always @(inst or stall) begin
                             reg_dst_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0010; // add
-                            stall_out = 2;
                         end
                         // sub
                         6'b100010: begin
                             reg_dst_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0110; // sub
-                            stall_out = 2;
                         end
                         // and
                         6'b100100: begin
                             reg_dst_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0000; // and
-                            stall_out = 2;
                         end
                         // or
                         6'b100101: begin
                             reg_dst_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0001; // or
-                            stall_out = 2;
                         end
                         // slt
                         6'b101010: begin
                             reg_dst_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0111; // slt
-                            stall_out = 2;
                         end
                         // jr
                         6'b001000: begin
@@ -117,7 +112,6 @@ always @(inst or stall) begin
                             shamt_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0011; // <<
-                            stall_out = 2;
                         end
                         // srl
                         6'b000010: begin
@@ -126,7 +120,6 @@ always @(inst or stall) begin
                             shamt_mux = 1;
                             reg_write = 1;
                             alu_ctr = 4'b0100; // >>
-                            stall_out = 2;
                         end
                         default:
                             $stop;
@@ -163,21 +156,18 @@ always @(inst or stall) begin
                     alu_src_mux = 1;
                     reg_write = 1;
                     alu_ctr = 4'b0010; // add
-                    stall_out = 2;
                 end
                 6'b001100: begin    // andi
                     alu_src_mux = 1;
                     reg_write = 1;
                     ext_type = 1;
                     alu_ctr = 4'b0000; // and
-                    stall_out = 2;
                 end
                 6'b001101: begin    // ori
                     alu_src_mux = 1;
                     reg_write = 1;
                     ext_type = 1;
                     alu_ctr = 4'b0001; // or
-                    stall_out = 2;
                 end
                 default:
                     $stop;
