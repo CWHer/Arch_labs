@@ -1,7 +1,7 @@
 lw      $1 0x0 $zero
-lw      $2 0x1 $zero
-add     $3,$1,$2
-sub     $4,$2,$1
+lw      $2 0x1 $zero    # data hazard
+add     $3,$1,$2        # structural hazard
+sub     $4,$3,$1        # data hazard
 and     $5,$1,$2
 or      $6,$1,$2
 addi    $7,$1,0x1
